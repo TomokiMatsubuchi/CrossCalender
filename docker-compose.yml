@@ -36,7 +36,7 @@ services:
       - ./next:/next
     command: sh -c "npm run dev"
     ports:
-      - 8000:3000
+      - 8080:8080
 
 volumes:
   bundle_data:
