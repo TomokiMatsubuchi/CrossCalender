@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // 環境変数からAPIのベースURLを取得、設定されていない場合はデフォルト値を使用
-const baseURL = process.env.API_URL || 'http://api:3000'
+const baseURL = process.env.API_URL || 'http://localhost:3000'
 
 // axiosのインスタンスを作成
 const instance = axios.create({

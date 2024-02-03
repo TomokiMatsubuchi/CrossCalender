@@ -1,10 +1,11 @@
 'use client'
 
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Toolbar, Typography } from '@mui/material'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import MyAccountMenu from '../../ui-elements/layouts/my-account-menu'
 
 const Header = () => {
   const [elevate, setElevate] = useState(false)
@@ -39,13 +40,11 @@ const Header = () => {
           </Link>
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
             {session ? (
-              <IconButton color='inherit'>
-                <AccountCircleIcon />
-              </IconButton>
+              <MyAccountMenu session={session} />
             ) : (
               <Link href='/sign-in' style={{ textDecoration: 'none', color: 'inherit' }}>
                 <Typography variant='h6' component='div'>
-                  Login
+                  ログイン
                 </Typography>
               </Link>
             )}

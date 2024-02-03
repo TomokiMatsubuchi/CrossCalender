@@ -1,8 +1,8 @@
 import { AxiosError } from 'axios'
+import axios from 'axios'
 import NextAuth, { User as NextAuthUser, Session } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import axios from '../../../_lib/axios'
 
 interface User extends NextAuthUser {
   accessToken?: string
@@ -23,10 +23,11 @@ export const authOptions = {
       },
       authorize: async (credentials) => {
         if (!credentials) return null
+        const baseURL = 'http://api:3000/api/v1'
         let endpoint
         let reqBody
         if (credentials.signUp) {
-          endpoint = '/api/v1/auth'
+          endpoint = '/auth'
           reqBody = {
             email: credentials.email,
             password: credentials.password,
@@ -34,16 +35,15 @@ export const authOptions = {
             name: credentials.name,
           }
         } else {
-          endpoint = '/api/v1/auth/sign_in'
+          endpoint = '/auth/sign_in'
           reqBody = {
             email: credentials.email,
             password: credentials.password,
           }
         }
         try {
-          const res = await axios.post(endpoint, reqBody)
+          const res = await axios.post(baseURL + endpoint, reqBody)
           if (res.status === 200 && res.data) {
-            // Rails APIからのレスポンスに含まれるaccess_token、uid、clientをユーザーオブジェクトに追加
             return {
               accessToken: res.headers['access-token'],
               uid: res.headers['uid'],
