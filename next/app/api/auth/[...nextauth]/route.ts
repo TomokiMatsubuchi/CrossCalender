@@ -1,5 +1,4 @@
-import { AxiosError } from 'axios'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import NextAuth, { User as NextAuthUser, Session } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
