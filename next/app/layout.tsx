@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Footer from './_components/ui-parts/layouts/footer'
 import Header from './_components/ui-parts/layouts/header'
+import NextAuthProvider from './_components/ui-parts/layouts/session-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,9 +21,11 @@ export default function RootLayout({
     <html lang='ja'>
       <body className={inter.className}>
         <AppRouterCacheProvider>
-          <Header />
-          {children}
-          <Footer />
+          <NextAuthProvider>
+            <Header />
+            {children}
+            <Footer />
+          </NextAuthProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

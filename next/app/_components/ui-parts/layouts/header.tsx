@@ -1,11 +1,14 @@
 'use client'
 
-import { AppBar, Box, Button, IconButton, Toolbar, Typography } from '@mui/material'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
 const Header = () => {
   const [elevate, setElevate] = useState(false)
+  const { data: session } = useSession()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,11 +38,17 @@ const Header = () => {
             </Typography>
           </Link>
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-            <Link href='/sign-in' style={{ textDecoration: 'none', color: 'inherit' }}>
-              <Typography variant='h6' component='div'>
-                Login
-              </Typography>
-            </Link>
+            {session ? (
+              <IconButton color='inherit'>
+                <AccountCircleIcon />
+              </IconButton>
+            ) : (
+              <Link href='/sign-in' style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Typography variant='h6' component='div'>
+                  Login
+                </Typography>
+              </Link>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
