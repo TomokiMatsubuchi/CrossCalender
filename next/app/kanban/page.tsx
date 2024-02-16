@@ -2,7 +2,7 @@
 
 import { Button, Grid, Paper, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import TaskDialog from '../_components/ui-parts/kanban/create-popup'
+import TaskDialog from '../_components/ui-parts/kanban/createPopup'
 import axios from '../_lib/axios'
 
 export interface Task {

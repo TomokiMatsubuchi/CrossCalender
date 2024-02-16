@@ -2,14 +2,15 @@
 
 import { AppBar, Box, Toolbar, Typography } from '@mui/material'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import MyAccountMenu from '../../ui-elements/layouts/my-account-menu'
+import { useCurrentUser } from '../../context/currentUserContext'
+import MyAccountMenu from '../../ui-elements/layouts/myAccountMenu'
 
 const Header = () => {
   const [elevate, setElevate] = useState(false)
-  const { data: session } = useSession()
+  const currentUser = useCurrentUser()?.currentUser
+
+  const isAuthenticated = Boolean(currentUser)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,8 +40,8 @@ const Header = () => {
             </Typography>
           </Link>
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-            {session ? (
-              <MyAccountMenu session={session} />
+            {isAuthenticated ? (
+              <MyAccountMenu />
             ) : (
               <Link href='/sign-in' style={{ textDecoration: 'none', color: 'inherit' }}>
                 <Typography variant='h6' component='div'>
@@ -51,7 +52,7 @@ const Header = () => {
           </Box>
         </Toolbar>
       </AppBar>
-      <Toolbar /> {/* これはAppBarの高さ分のスペースを確保するために必要です */}
+      <Toolbar />
     </Box>
   )
 }

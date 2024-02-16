@@ -2,35 +2,46 @@
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { Button, Stack, TextField, Typography, IconButton, InputAdornment } from '@mui/material'
+import axios, { isAxiosError } from 'axios'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
+import { useCurrentUser } from '../_components//context//currentUserContext'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const { data: session, status } = useSession()
+  const [error, setError] = useState('')
   const router = useRouter()
+  const currentUserContext = useCurrentUser()
 
-  useEffect(() => {
-    if (session) {
-      router.push('/kanban')
-    }
-  }, [session, router])
+  if (!currentUserContext) return null
+  const { currentUser, setCurrentUser } = currentUserContext
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const result = await signIn('credentials', {
-      redirect: false,
-      email: email,
-      password: password,
-    })
+    try {
+      console.log(email, password)
 
-    if (result?.error === '401') {
-      return alert('メールアドレスまたはパスワードが間違っています')
+      const response = await axios.post('/api/auth/sign-in', {
+        email: email,
+        password: password,
+      })
+
+      if (response.status === 200) {
+        setCurrentUser(response.data)
+        router.push('/kanban')
+      } else {
+        setError('メールアドレスまたはパスワードが間違っています')
+      }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        setError(error.response?.data?.message || error.message)
+      } else {
+        setError('予期せぬエラーが発生しました。')
+      }
     }
   }
 
@@ -40,10 +51,6 @@ export default function SignIn() {
 
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
-  }
-
-  if (status === 'loading') {
-    return <Typography>読み込み中...</Typography>
   }
 
   return (
@@ -84,6 +91,7 @@ export default function SignIn() {
             ),
           }}
         />
+        {error && <Typography color='error'>{error}</Typography>}
         <Button type='submit' variant='contained'>
           ログイン
         </Button>

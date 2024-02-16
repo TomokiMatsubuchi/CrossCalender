@@ -1,9 +1,10 @@
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { CurrentUserProvider } from './_components/context/currentUserContext'
 import Footer from './_components/ui-parts/layouts/footer'
 import Header from './_components/ui-parts/layouts/header'
-import NextAuthProvider from './_components/ui-parts/layouts/session-provider'
+import { RouteGuard } from './_components/ui-parts/layouts/routeGurd'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,13 +21,17 @@ export default function RootLayout({
   return (
     <html lang='ja'>
       <body className={inter.className}>
-        <AppRouterCacheProvider>
-          <NextAuthProvider>
-            <Header />
-            {children}
-            <Footer />
-          </NextAuthProvider>
-        </AppRouterCacheProvider>
+        <CurrentUserProvider>
+          <AppRouterCacheProvider>
+            <RouteGuard>
+              <>
+                <Header />
+                {children}
+                <Footer />
+              </>
+            </RouteGuard>
+          </AppRouterCacheProvider>
+        </CurrentUserProvider>
       </body>
     </html>
   )

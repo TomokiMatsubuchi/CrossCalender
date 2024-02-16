@@ -12,7 +12,6 @@ import {
   MenuItem,
   Select,
 } from '@mui/material'
-import { useSession } from 'next-auth/react' // next-authからuseSessionをインポート
 import React from 'react'
 import axios from '../../../_lib/axios'
 
@@ -21,7 +20,7 @@ interface TaskDialogProps {
   handleClose: () => void
   newTask: any
   setNewTask: React.Dispatch<React.SetStateAction<any>>
-  fetchTasks: () => void // タスクを再取得するための関数をpropsとして追加
+  fetchTasks: () => void
 }
 
 const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -31,16 +30,10 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   setNewTask,
   fetchTasks,
 }) => {
-  const { data: session } = useSession() // セッションデータを取得
-
   // タスク作成処理を追加
   const createTask = async () => {
-    if (!session) {
-      console.error('ユーザーが認証されていません。')
-      return
-    }
     try {
-      await axios.post('/api/v1/tasks', { task: { ...newTask, user_id: session.userId } }) // sessionからuserIdを取得して送信
+      await axios.post('/api/v1/tasks', { task: newTask }) // TODO: API経由してrailsに送信するようにする。
       fetchTasks() // タスク作成後にタスクリストを再取得
       handleClose() // ダイアログを閉じる
     } catch (error) {

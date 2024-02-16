@@ -1,16 +1,18 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { IconButton, Menu, MenuItem } from '@mui/material'
+import axios from 'axios'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Session } from 'next-auth'
-import { signOut } from 'next-auth/react'
 import { useState } from 'react'
-import axios from '../../../_lib/axios'
+import { useCurrentUser } from '../../context/currentUserContext'
 
-const MyAccountMenu = ({ session }: { session: Session }) => {
-  const [anchorEl, setAnchorEl] = useState(null)
+const MyAccountMenu = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const router = useRouter()
+  const currentUserContext = useCurrentUser()
+  if (!currentUserContext) return null
+  const { currentUser, setCurrentUser } = currentUserContext
 
   const handleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget as any)
@@ -21,17 +23,10 @@ const MyAccountMenu = ({ session }: { session: Session }) => {
   }
 
   const handleLogout = async () => {
-    if (!session) return
-    const endpoint = '/api/v1/auth/sign_out'
-    const headers = {
-      'access-token': session.accessToken as string,
-      client: session.client as string,
-      uid: session.uid as string,
-    }
     try {
-      const response = await axios.delete(endpoint, { headers: headers })
+      const response = await axios.delete('/api/auth/sign-out', {})
       if (response.status === 200) {
-        signOut({ redirect: false })
+        setCurrentUser(null)
         router.push('/')
       } else {
         alert('サインアウトに失敗しました')
@@ -50,12 +45,12 @@ const MyAccountMenu = ({ session }: { session: Session }) => {
         id='menu-appbar'
         anchorEl={anchorEl}
         anchorOrigin={{
-          vertical: 'bottom', // ここを 'top' から 'bottom' に変更しました
+          vertical: 'bottom',
           horizontal: 'right',
         }}
         keepMounted
         transformOrigin={{
-          vertical: 'top', // ここを 'bottom' から 'top' に変更しました
+          vertical: 'top',
           horizontal: 'right',
         }}
         open={open}

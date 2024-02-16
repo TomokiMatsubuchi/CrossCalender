@@ -10,9 +10,10 @@ import {
   InputAdornment,
   FormHelperText,
 } from '@mui/material'
+import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { useCurrentUser } from '../_components/context/currentUserContext'
 
 export default function SignUp() {
   const [name, setName] = useState('')
@@ -22,15 +23,11 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [error, setError] = useState('')
-  const { data: session, status } = useSession()
-
   const router = useRouter()
+  const currentUserContext = useCurrentUser()
 
-  useEffect(() => {
-    if (session) {
-      router.push('/kanban')
-    }
-  }, [session, router])
+  if (!currentUserContext) return null
+  const { currentUser, setCurrentUser } = currentUserContext
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -38,16 +35,21 @@ export default function SignUp() {
       setError('パスワードとパスワード確認が一致しません。')
       return
     }
-    const result = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-      passwordConfirmation,
-      name,
-      signUp: true,
-    })
-    if (result?.error === '422') {
-      alert('すでにアカウントが存在します')
+    try {
+      const response = await axios.post('/api/auth/sign-up', {
+        email,
+        password,
+        passwordConfirmation,
+        name,
+      })
+      if (response.status === 200) {
+        setCurrentUser(response.data)
+        router.push('/kanban')
+      } else {
+        setError('アカウント作成に失敗しました。')
+      }
+    } catch (error) {
+      setError('アカウント作成に失敗しました。')
     }
   }
 
