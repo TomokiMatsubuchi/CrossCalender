@@ -5,3 +5,7 @@
 #
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
+
+Column.create(name: "未着手", position: 1)
+Column.create(name: "進行中", position: 2)
+Column.create(name: "完了", position: 3)

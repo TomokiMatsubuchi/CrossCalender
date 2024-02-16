@@ -1,12 +1,22 @@
 import axios, { AxiosError } from 'axios'
-import NextAuth, { User as NextAuthUser, Session } from 'next-auth'
+import NextAuth, { AuthOptions, User as NextAuthUser, Session } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+interface UserData {
+  email: string
+  provider: string
+  uid: string
+  id: number
+  allow_password_change: boolean
+  name: string | null
+  image: string | null
+}
 interface User extends NextAuthUser {
   accessToken?: string
   uid?: string
   client?: string
+  data: UserData
 }
 
 export const authOptions = {
@@ -64,19 +74,19 @@ export const authOptions = {
   ],
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User }) {
-      // 認証成功時、userからaccess_token、uid、clientをJWTトークンに追加
       if (user) {
         token.accessToken = user.accessToken
         token.uid = user.uid
         token.client = user.client
+        token.userId = user.data.id
       }
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      // JWTトークンからaccess_token、uid、clientをセッションに追加
       session.accessToken = token.accessToken as string
       session.uid = token.uid as string
       session.client = token.client as string
+      session.userId = token.userId as number
       return session
 
       // page.tsxでは以下のように使用する。
@@ -84,10 +94,11 @@ export const authOptions = {
       //   console.log(session.accessToken) // accessTokenにアクセス
       //   console.log(session.uid) // uidにアクセス
       //   console.log(session.client) // clientにアクセス
+      //   console.log(session.userId) // userIdにアクセス
       // }
     },
   },
 }
 
-const handler = NextAuth(authOptions)
+const handler = NextAuth(authOptions as unknown as AuthOptions)
 export { handler as GET, handler as POST }

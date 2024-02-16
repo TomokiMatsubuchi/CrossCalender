@@ -26,4 +26,6 @@
 class Task < ApplicationRecord
   belongs_to :user
   belongs_to :column
+
+  validates :title, :description, :status, :priority, :due_date, :user_id, presence: true
 end

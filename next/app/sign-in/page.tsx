@@ -16,7 +16,7 @@ export default function SignIn() {
 
   useEffect(() => {
     if (session) {
-      router.push('/')
+      router.push('/kanban')
     }
   }, [session, router])
 
@@ -30,9 +30,7 @@ export default function SignIn() {
     })
 
     if (result?.error === '401') {
-      alert('メールアドレスまたはパスワードが間違っています')
-    } else {
-      router.push('/')
+      return alert('メールアドレスまたはパスワードが間違っています')
     }
   }
 

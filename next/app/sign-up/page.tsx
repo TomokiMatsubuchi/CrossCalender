@@ -11,8 +11,8 @@ import {
   FormHelperText,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
-import { useState } from 'react'
+import { signIn, useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 
 export default function SignUp() {
   const [name, setName] = useState('')
@@ -22,8 +22,15 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [error, setError] = useState('')
+  const { data: session, status } = useSession()
 
   const router = useRouter()
+
+  useEffect(() => {
+    if (session) {
+      router.push('/kanban')
+    }
+  }, [session, router])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -41,8 +48,6 @@ export default function SignUp() {
     })
     if (result?.error === '422') {
       alert('すでにアカウントが存在します')
-    } else {
-      router.push('/')
     }
   }
 

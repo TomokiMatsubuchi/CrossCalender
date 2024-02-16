@@ -5,5 +5,6 @@ declare module 'next-auth' {
     accessToken?: string
     uid?: string
     client?: string
+    userId?: number
   }
 }
