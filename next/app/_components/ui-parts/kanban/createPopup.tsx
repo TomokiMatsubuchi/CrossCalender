@@ -12,8 +12,8 @@ import {
   MenuItem,
   Select,
 } from '@mui/material'
+import axios from 'axios'
 import React from 'react'
-import axios from '../../../_lib/axios'
 
 interface TaskDialogProps {
   open: boolean
@@ -33,7 +33,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   // タスク作成処理を追加
   const createTask = async () => {
     try {
-      await axios.post('/api/v1/tasks', { task: newTask }) // TODO: API経由してrailsに送信するようにする。
+      await axios.post('/api/tasks/create', { task: newTask })
       fetchTasks() // タスク作成後にタスクリストを再取得
       handleClose() // ダイアログを閉じる
     } catch (error) {

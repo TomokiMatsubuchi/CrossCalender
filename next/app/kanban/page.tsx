@@ -1,9 +1,9 @@
 'use client'
 
 import { Button, Grid, Paper, Typography } from '@mui/material'
+import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import TaskDialog from '../_components/ui-parts/kanban/createPopup'
-import axios from '../_lib/axios'
 
 export interface Task {
   id: React.Key
@@ -23,7 +23,7 @@ const fetchTasks = async (setTasks: {
   (value: React.SetStateAction<Task[]>): void
   (arg0: any): void
 }) => {
-  const response = await axios.get('/api/v1/tasks')
+  const response = await axios.get('/api/tasks/index')
   setTasks(response.data)
 }
 

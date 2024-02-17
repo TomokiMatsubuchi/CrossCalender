@@ -12,7 +12,7 @@ class Api::V1::TasksController < ApplicationController
   end
 
   def create
-    @task = Task.new(task_params)
+    @task = current_api_v1_user.tasks.new(task_params)
     @task.column = Column.find_by(name: task_params[:status])
     if @task.save
       render json: @task, status: :created, location: api_v1_task_url(@task)
@@ -40,6 +40,6 @@ class Api::V1::TasksController < ApplicationController
     end
 
     def task_params
-      params.require(:task).permit(:title, :description, :status, :priority, :due_date, :user_id)
+      params.require(:task).permit(:title, :description, :status, :priority, :due_date)
     end
 end
