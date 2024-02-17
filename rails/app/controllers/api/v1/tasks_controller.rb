@@ -3,7 +3,7 @@ class Api::V1::TasksController < ApplicationController
   before_action :set_task, only: [:show, :update, :destroy]
 
   def index
-    @tasks = Task.all
+    @tasks = current_api_v1_user.tasks.all
     render json: @tasks
   end
 

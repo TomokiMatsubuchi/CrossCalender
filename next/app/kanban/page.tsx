@@ -4,6 +4,7 @@ import { Button, Grid, Paper, Typography } from '@mui/material'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import TaskDialog from '../_components/ui-parts/kanban/createPopup'
+import DetailPopup from '../_components/ui-parts/kanban/detailPopup'
 
 export interface Task {
   id: React.Key
@@ -30,6 +31,8 @@ const fetchTasks = async (setTasks: {
 const KanbanPage = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [open, setOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -44,6 +47,11 @@ const KanbanPage = () => {
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+  const handleDetailOpen = (task: Task) => {
+    setSelectedTask(task)
+    setDetailOpen(true)
+  }
+  const handleDetailClose = () => setDetailOpen(false)
 
   return (
     <div>
@@ -59,7 +67,7 @@ const KanbanPage = () => {
       />
       <Grid container spacing={2} style={{ marginTop: '20px' }}>
         {tasks.map((task) => (
-          <Grid item xs={12} md={4} key={task.id}>
+          <Grid item xs={12} md={4} key={task.id} onClick={() => handleDetailOpen(task)}>
             <Paper elevation={3} style={{ padding: '16px', margin: '8px' }}>
               <Typography variant='h6'>{task.title}</Typography>
               <Typography color='textSecondary'>{task.description}</Typography>
@@ -69,6 +77,7 @@ const KanbanPage = () => {
           </Grid>
         ))}
       </Grid>
+      <DetailPopup open={detailOpen} handleClose={handleDetailClose} selectedTask={selectedTask} />
     </div>
   )
 }
