@@ -1,6 +1,7 @@
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import React, { memo } from 'react'
 import { CurrentUserProvider } from './_components/context/currentUserContext'
 import Footer from './_components/ui-parts/layouts/footer'
 import Header from './_components/ui-parts/layouts/header'
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
   title: 'Cross Calendar',
   description: '複数のカレンダーを一つにまとめるアプリ',
 }
+
+const MemoizedHeader = memo(Header)
+const MemoizedFooter = memo(Footer)
 
 export default function RootLayout({
   children,
@@ -25,9 +29,9 @@ export default function RootLayout({
           <AppRouterCacheProvider>
             <RouteGuard>
               <>
-                <Header />
+                <MemoizedHeader />
                 {children}
-                <Footer />
+                <MemoizedFooter />
               </>
             </RouteGuard>
           </AppRouterCacheProvider>
