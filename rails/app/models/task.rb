@@ -28,4 +28,8 @@ class Task < ApplicationRecord
   belongs_to :column
 
   validates :title, :description, :status, :priority, :due_date, :user_id, presence: true
+
+  def assign_column_from_status(status)
+    self.column = Column.find_by(name: status)
+  end
 end

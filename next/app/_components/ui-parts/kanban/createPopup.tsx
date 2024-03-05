@@ -14,13 +14,15 @@ import {
 } from '@mui/material'
 import axios from 'axios'
 import React from 'react'
+import { Column, Task } from '../../../kanban/page'
 
 interface TaskDialogProps {
   open: boolean
   handleClose: () => void
-  newTask: any
+  newTask: Task
   setNewTask: React.Dispatch<React.SetStateAction<any>>
   fetchTasks: () => void
+  columns: Column[]
 }
 
 const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -29,18 +31,17 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   newTask,
   setNewTask,
   fetchTasks,
+  columns,
 }) => {
-  // タスク作成処理を追加
   const createTask = async () => {
     try {
       await axios.post('/api/tasks/create', { task: newTask })
-      fetchTasks() // タスク作成後にタスクリストを再取得
-      handleClose() // ダイアログを閉じる
+      fetchTasks()
+      handleClose()
     } catch (error) {
       console.error('タスクの作成に失敗しました。', error)
     }
   }
-
   return (
     <Dialog
       open={open}
@@ -81,7 +82,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
           type='date'
           fullWidth
           variant='outlined'
-          value={newTask.due_date.toISOString().split('T')[0]}
+          value={newTask.dueDate?.toISOString().split('T')[0]}
           onChange={(e) => setNewTask({ ...newTask, due_date: new Date(e.target.value) })}
         />
         <TextField
@@ -103,9 +104,11 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
             onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
             label='ステータス'
           >
-            <MenuItem value='未着手'>未着手</MenuItem>
-            <MenuItem value='着手中'>着手中</MenuItem>
-            <MenuItem value='完了'>完了</MenuItem>
+            {columns.map((column) => (
+              <MenuItem key={column.id} value={column.id}>
+                {column.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </DialogContent>

@@ -29,10 +29,8 @@ export const POST = async (req: Request) => {
       )
       res.headers.append('Set-Cookie', `uid=${uid}; Path=/; Secure; HttpOnly; SameSite=Strict`)
 
-      console.log('ログイン成功:', response.data)
       return res
     } else {
-      console.error('ログイン失敗:', response)
       return new NextResponse(
         JSON.stringify({ message: 'メールアドレスまたはパスワードが間違っています。' }),
         {

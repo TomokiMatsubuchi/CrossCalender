@@ -1,11 +1,5 @@
-# app/controllers/api/v1/tasks_controller.rb
 class Api::V1::TasksController < ApplicationController
   before_action :set_task, only: [:show, :update, :destroy]
-
-  def index
-    @tasks = current_api_v1_user.tasks.all
-    render json: @tasks
-  end
 
   def show
     render json: @task
@@ -13,7 +7,7 @@ class Api::V1::TasksController < ApplicationController
 
   def create
     @task = current_api_v1_user.tasks.new(task_params)
-    @task.column = Column.find_by(name: task_params[:status])
+    @task.assign_column_from_status(task_params[:status])
     if @task.save
       render json: @task, status: :created, location: api_v1_task_url(@task)
     else
@@ -22,6 +16,7 @@ class Api::V1::TasksController < ApplicationController
   end
 
   def update
+    @task.assign_column_from_status(task_params[:status])
     if @task.update(task_params)
       render json: @task
     else

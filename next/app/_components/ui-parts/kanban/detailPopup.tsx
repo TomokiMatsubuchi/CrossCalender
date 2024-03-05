@@ -9,14 +9,15 @@ import {
   Select,
   MenuItem,
 } from '@mui/material'
-import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { Task } from '../../../kanban/page'
+import { Column, Task } from '../../../kanban/page'
 
 interface DetailPopupProps {
   open: boolean
   handleClose: () => void
   selectedTask: Task | null
+  columns: Column[]
+  onEditTask: (task: Task) => void
 }
 
 const modalStyle = {
@@ -31,7 +32,13 @@ const modalStyle = {
   p: 4,
 }
 
-const DetailPopup: React.FC<DetailPopupProps> = ({ open, handleClose, selectedTask }) => {
+const DetailPopup: React.FC<DetailPopupProps> = ({
+  open,
+  handleClose,
+  selectedTask,
+  columns,
+  onEditTask,
+}) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedTask, setEditedTask] = useState<Task | null>(null)
 
@@ -43,9 +50,9 @@ const DetailPopup: React.FC<DetailPopupProps> = ({ open, handleClose, selectedTa
     setIsEditing(true)
   }
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (editedTask) {
-      const res = await axios.patch(`/api/tasks/update`, editedTask)
+      onEditTask(editedTask)
       setIsEditing(false)
     }
   }
@@ -101,6 +108,20 @@ const DetailPopup: React.FC<DetailPopupProps> = ({ open, handleClose, selectedTa
                 <MenuItem value={3}>高</MenuItem>
               </Select>
             </FormControl>
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>進行状況</InputLabel>
+              <Select
+                value={editedTask?.status || ''}
+                label='進行状況'
+                onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value } as Task)}
+              >
+                {columns.map((column) => (
+                  <MenuItem key={column.id} value={column.name}>
+                    {column.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <Box sx={{ display: 'flex', justifyContent: 'end', gap: '1rem', mt: 2 }}>
               <Button onClick={handleSave} variant='contained' color='primary'>
                 保存
@@ -122,6 +143,7 @@ const DetailPopup: React.FC<DetailPopupProps> = ({ open, handleClose, selectedTa
               期限: {selectedTask?.dueDate?.toLocaleDateString()}
             </Typography>
             <Typography sx={{ mt: 2 }}>優先度: {selectedTask?.priority}</Typography>
+            <Typography sx={{ mt: 2 }}>進行状況: {selectedTask?.status}</Typography>
             <Box sx={{ display: 'flex', justifyContent: 'end', gap: '1rem', mt: 2 }}>
               <Button onClick={handleEdit} variant='contained' color='primary'>
                 編集

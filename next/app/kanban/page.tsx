@@ -1,83 +1,159 @@
 'use client'
 
-import { Button, Grid, Paper, Typography } from '@mui/material'
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import TaskDialog from '../_components/ui-parts/kanban/createPopup'
+import React, { useEffect, useState, useCallback } from 'react'
 import DetailPopup from '../_components/ui-parts/kanban/detailPopup'
 
 export interface Task {
-  id: React.Key
+  id?: React.Key
   description?: string
   dueDate?: Date
   priority?: number
   status?: string
   title?: string
-  createdAt: Date
-  updatedAt: Date
-  columnId: number
-  userId: number
+  createdAt?: Date
+  updatedAt?: Date
+  columnId?: number
+  userId?: number
 }
 
-const fetchTasks = async (setTasks: {
-  (value: React.SetStateAction<Task[]>): void
-  (value: React.SetStateAction<Task[]>): void
-  (arg0: any): void
-}) => {
-  const response = await axios.get('/api/tasks/index')
-  setTasks(response.data)
+export interface Column {
+  id: number
+  name: string
+  position: number
+  tasks: Task[]
 }
 
 const KanbanPage = () => {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [open, setOpen] = useState(false)
-  const [detailOpen, setDetailOpen] = useState(false)
+  const [columns, setColumns] = useState<Column[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    due_date: new Date(),
-    priority: 1,
-    status: '未着手',
-  })
+  const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
+
+  const fetchColumns = async () => {
+    try {
+      const response = await axios.get('/api/columns/index')
+      console.log(response.data)
+
+      setColumns(response.data)
+    } catch (error) {
+      console.error('カラム情報の取得に失敗しました。', error)
+    }
+  }
+
+  const updateTask = async (task: Task) => {
+    try {
+      const response = await axios.patch(`/api/tasks/update`, task)
+      if (response.status === 200) {
+        console.log('タスクの更新に成功しました。', response.data)
+      } else {
+        console.error('タスクの更新に失敗しました。', response)
+      }
+    } catch (error) {
+      console.error('タスクの更新中にエラーが発生しました。', error)
+    }
+  }
 
   useEffect(() => {
-    fetchTasks(setTasks)
+    fetchColumns()
   }, [])
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
-  const handleDetailOpen = (task: Task) => {
+  const handleTaskClick = (task: Task) => {
     setSelectedTask(task)
-    setDetailOpen(true)
+    setIsDetailPopupOpen(true)
   }
-  const handleDetailClose = () => setDetailOpen(false)
+
+  const handleCloseDetailPopup = () => {
+    setIsDetailPopupOpen(false)
+  }
+
+  const handleEditTask = useCallback((editedTask: Task) => {
+    updateTask(editedTask)
+    setColumns((prevColumns) => {
+      const originalTask = prevColumns
+        .find((column) => column.tasks.some((task) => task.id === editedTask.id))
+        ?.tasks.find((task) => task.id === editedTask.id)
+      const statusChanged = originalTask && originalTask.status !== editedTask.status
+
+      if (statusChanged) {
+        return prevColumns.map((column) => {
+          const filteredTasks = column.tasks.filter((task) => task.id !== editedTask.id)
+          if (column.name === editedTask.status) {
+            return {
+              ...column,
+              tasks: [...filteredTasks, editedTask],
+            }
+          } else {
+            return {
+              ...column,
+              tasks: filteredTasks,
+            }
+          }
+        })
+      } else {
+        return prevColumns.map((column) => ({
+          ...column,
+          tasks: column.tasks.map((task) => (task.id === editedTask.id ? editedTask : task)),
+        }))
+      }
+    })
+    setSelectedTask(editedTask)
+  }, [])
 
   return (
-    <div>
-      <Button variant='contained' onClick={handleOpen}>
-        新規タスクを追加
-      </Button>
-      <TaskDialog
-        open={open}
-        handleClose={handleClose}
-        newTask={newTask}
-        setNewTask={setNewTask}
-        fetchTasks={() => fetchTasks(setTasks)}
+    <div style={{ display: 'flex', justifyContent: 'space-around', overflowX: 'auto' }}>
+      {columns.map((column) => (
+        <div
+          key={column.id}
+          style={{
+            minWidth: '300px',
+            margin: '20px',
+            padding: '10px',
+            backgroundColor: '#f0f0f0',
+            borderRadius: '10px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          }}
+        >
+          <h2 style={{ borderBottom: '2px solid #333', paddingBottom: '10px' }}>{column.name}</h2>
+          {column.tasks.map((task) => (
+            <div
+              key={task.id}
+              style={{
+                margin: '10px 0',
+                padding: '10px',
+                backgroundColor: 'white',
+                borderRadius: '5px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                cursor: 'pointer',
+              }}
+              onClick={() => handleTaskClick(task)}
+            >
+              <h3>{task.title}</h3>
+              <p>{task.description}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                <span style={{ fontSize: '12px', color: '#666' }}>
+                  {task.dueDate?.toLocaleDateString()}
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: task.priority === 3 ? 'red' : task.priority === 2 ? 'orange' : 'green',
+                  }}
+                >
+                  {task.priority === 3 ? '高' : task.priority === 2 ? '中' : '低'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+      <DetailPopup
+        open={isDetailPopupOpen}
+        handleClose={handleCloseDetailPopup}
+        selectedTask={selectedTask}
+        columns={columns}
+        onEditTask={handleEditTask}
       />
-      <Grid container spacing={2} style={{ marginTop: '20px' }}>
-        {tasks.map((task) => (
-          <Grid item xs={12} md={4} key={task.id} onClick={() => handleDetailOpen(task)}>
-            <Paper elevation={3} style={{ padding: '16px', margin: '8px' }}>
-              <Typography variant='h6'>{task.title}</Typography>
-              <Typography color='textSecondary'>{task.description}</Typography>
-              <Typography variant='body2'>{task.dueDate?.toLocaleDateString()}</Typography>
-              <Typography variant='body2'>優先度: {task.priority}</Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-      <DetailPopup open={detailOpen} handleClose={handleDetailClose} selectedTask={selectedTask} />
+      {/* 次は新規タスクの作成からスタート */}
     </div>
   )
 }

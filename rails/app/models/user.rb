@@ -36,4 +36,5 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_many :tasks
+  has_many :columns
 end
