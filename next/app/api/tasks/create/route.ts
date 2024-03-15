@@ -15,15 +15,26 @@ export const POST = async (req: Request) => {
 
   try {
     const body = await req.json()
-    console.log(body)
 
-    const response = await axios.post('/api/v1/tasks', body, {
-      headers: {
-        'access-token': accessToken[0],
-        client: client[0],
-        uid: uid[0],
+    const response = await axios.post(
+      '/api/v1/tasks',
+      {
+        task: {
+          title: body.title,
+          description: body.description,
+          status: body.status,
+          priority: body.priority,
+          due_date: body.dueDate,
+        },
       },
-    })
+      {
+        headers: {
+          'access-token': accessToken[0],
+          client: client[0],
+          uid: uid[0],
+        },
+      },
+    )
 
     if (response.status === 200) {
       return new NextResponse(JSON.stringify(response.data))

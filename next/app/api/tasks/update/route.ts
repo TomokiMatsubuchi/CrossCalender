@@ -15,8 +15,6 @@ export const PATCH = async (req: Request) => {
 
   try {
     const body = await req.json()
-    console.log(body)
-
     const response = await axios.patch(
       `/api/v1/tasks/${body.id}`,
       {

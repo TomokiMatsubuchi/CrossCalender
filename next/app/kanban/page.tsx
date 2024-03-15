@@ -1,8 +1,10 @@
 'use client'
 
+import { Button } from '@mui/material'
 import axios from 'axios'
 import React, { useEffect, useState, useCallback } from 'react'
 import DetailPopup from '../_components/ui-parts/kanban/detailPopup'
+import CreateTaskPopup from '@/_components/ui-parts/kanban/createPopup'
 
 export interface Task {
   id?: React.Key
@@ -28,6 +30,8 @@ const KanbanPage = () => {
   const [columns, setColumns] = useState<Column[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
+  const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false)
+  const [selectedColumn, setSelectedColumn] = useState<Column | null>(null)
 
   const fetchColumns = async () => {
     try {
@@ -66,6 +70,15 @@ const KanbanPage = () => {
     setIsDetailPopupOpen(false)
   }
 
+  const handleCreateTask = (column: Column) => {
+    setSelectedColumn(column)
+    setIsCreatePopupOpen(true)
+  }
+
+  const handleCloseCreatePopup = () => {
+    setIsCreatePopupOpen(false)
+  }
+
   const handleEditTask = useCallback((editedTask: Task) => {
     updateTask(editedTask)
     setColumns((prevColumns) => {
@@ -98,6 +111,15 @@ const KanbanPage = () => {
     })
     setSelectedTask(editedTask)
   }, [])
+
+  const createTask = async (newTask: Task) => {
+    try {
+      await axios.post('/api/tasks/create', newTask)
+      // taskの作成には成功したので、次はエラー時のバリデーションメッセージをRailsから受け取り表示できるようにする。
+    } catch (error) {
+      console.error('タスクの作成に失敗しました。', error)
+    }
+  }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-around', overflowX: 'auto' }}>
@@ -144,6 +166,14 @@ const KanbanPage = () => {
               </div>
             </div>
           ))}
+          <Button
+            variant='contained'
+            color='primary'
+            fullWidth
+            onClick={() => handleCreateTask(column)}
+          >
+            {column.name}に新規タスクを追加
+          </Button>
         </div>
       ))}
       <DetailPopup
@@ -153,7 +183,13 @@ const KanbanPage = () => {
         columns={columns}
         onEditTask={handleEditTask}
       />
-      {/* 次は新規タスクの作成からスタート */}
+      <CreateTaskPopup
+        open={isCreatePopupOpen}
+        handleClose={handleCloseCreatePopup}
+        column={selectedColumn}
+        columns={columns}
+        onCreateTask={createTask}
+      />
     </div>
   )
 }

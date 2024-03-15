@@ -12,36 +12,40 @@ import {
   MenuItem,
   Select,
 } from '@mui/material'
-import axios from 'axios'
-import React from 'react'
-import { Column, Task } from '../../../kanban/page'
+import React, { useState, useEffect } from 'react'
+import { Column, Task } from '@/kanban/page'
 
 interface TaskDialogProps {
   open: boolean
   handleClose: () => void
-  newTask: Task
-  setNewTask: React.Dispatch<React.SetStateAction<any>>
-  fetchTasks: () => void
+  column: Column | null
   columns: Column[]
+  onCreateTask: (task: Task) => Promise<void>
 }
 
-const TaskDialog: React.FC<TaskDialogProps> = ({
+const CreateTaskPopup: React.FC<TaskDialogProps> = ({
   open,
   handleClose,
-  newTask,
-  setNewTask,
-  fetchTasks,
+  column,
   columns,
+  onCreateTask,
 }) => {
-  const createTask = async () => {
-    try {
-      await axios.post('/api/tasks/create', { task: newTask })
-      fetchTasks()
-      handleClose()
-    } catch (error) {
-      console.error('タスクの作成に失敗しました。', error)
-    }
-  }
+  const [newTask, setNewTask] = useState<Task>({
+    title: '',
+    description: '',
+    dueDate: new Date(),
+    priority: 0,
+    status: column?.name || '',
+  })
+
+  useEffect(() => {
+    setNewTask((currentTask) => ({
+      ...currentTask,
+      status: column?.name || '',
+      dueDate: new Date(),
+    }))
+  }, [column])
+
   return (
     <Dialog
       open={open}
@@ -83,7 +87,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
           fullWidth
           variant='outlined'
           value={newTask.dueDate?.toISOString().split('T')[0]}
-          onChange={(e) => setNewTask({ ...newTask, due_date: new Date(e.target.value) })}
+          onChange={(e) => setNewTask({ ...newTask, dueDate: new Date(e.target.value) })}
         />
         <TextField
           margin='dense'
@@ -105,7 +109,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
             label='ステータス'
           >
             {columns.map((column) => (
-              <MenuItem key={column.id} value={column.id}>
+              <MenuItem key={column.id} value={column.name}>
                 {column.name}
               </MenuItem>
             ))}
@@ -116,7 +120,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
         <Button onClick={handleClose} color='primary'>
           キャンセル
         </Button>
-        <Button onClick={createTask} variant='contained' color='primary'>
+        <Button onClick={() => onCreateTask(newTask)} variant='contained' color='primary'>
           作成
         </Button>
       </DialogActions>
@@ -124,4 +128,4 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   )
 }
 
-export default TaskDialog
+export default CreateTaskPopup
