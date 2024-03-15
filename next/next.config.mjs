@@ -1,4 +1,13 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+import path from 'path'
 
-export default nextConfig;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack(config) {
+    config.resolve.alias = {
+      '@': path.resolve(__dirname, './app/'),
+    }
+    return config
+  },
+}
+
+export default nextConfig

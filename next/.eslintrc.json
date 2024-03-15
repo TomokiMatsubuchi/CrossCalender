@@ -1,18 +1,31 @@
 {
-	"extends": [
-		"next/core-web-vitals",
-		"plugin:import/recommended",
-		"plugin:import/warnings",
-		"prettier"
-	],
-	"rules": {
-		"import/order": [
-			"error",
-			{
-				"alphabetize": {
-					"order": "asc"
-				}
-			}
-		]
-	}
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:import/recommended",
+    "plugin:import/warnings",
+    "prettier",
+    "import",
+    "next/babel"
+  ],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      },
+      "typescript": {
+        "config": "./webpack.config.js",
+        "alwaysTryTypes": true
+      }
+    }
+  }
 }
