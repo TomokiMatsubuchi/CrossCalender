@@ -15,7 +15,7 @@ import {
 import React, { useState, useEffect } from 'react'
 import { Column, Task } from '@/kanban/page'
 
-interface TaskDialogProps {
+interface CreateTaskProps {
   open: boolean
   handleClose: () => void
   column: Column | null
@@ -23,7 +23,7 @@ interface TaskDialogProps {
   onCreateTask: (task: Task) => Promise<void>
 }
 
-const CreateTaskPopup: React.FC<TaskDialogProps> = ({
+const CreateTaskPopup: React.FC<CreateTaskProps> = ({
   open,
   handleClose,
   column,
