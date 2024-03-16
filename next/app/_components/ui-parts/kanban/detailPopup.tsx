@@ -167,7 +167,10 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
               {selectedTask?.description}
             </Typography>
             <Typography sx={{ mt: 2 }}>
-              期限: {selectedTask?.dueDate?.toLocaleDateString()}
+              期限:
+              {selectedTask?.dueDate
+                ? new Date(selectedTask.dueDate).toLocaleDateString()
+                : '未設定'}
             </Typography>
             <Typography sx={{ mt: 2 }}>
               優先度: {TaskPriority[selectedTask?.priority ?? 0]}

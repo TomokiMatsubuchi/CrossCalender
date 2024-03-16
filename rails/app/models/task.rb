@@ -4,10 +4,10 @@
 #
 #  id          :bigint           not null, primary key
 #  description :text
-#  due_date    :date
-#  priority    :integer
-#  status      :string
-#  title       :string
+#  due_date    :date             not null
+#  priority    :integer          not null
+#  status      :string           not null
+#  title       :string           not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  column_id   :bigint           not null
@@ -27,7 +27,7 @@ class Task < ApplicationRecord
   belongs_to :user
   belongs_to :column
 
-  validates :title, :description, :status, :priority, :due_date, :user_id, presence: true
+  validates :title, :status, :priority, :due_date, :user_id, presence: true
 
   def assign_column_from_status(status)
     self.column = Column.find_by(name: status)

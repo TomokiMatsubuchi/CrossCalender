@@ -32,7 +32,14 @@ export const useColumn = () => {
   const fetchColumns = useCallback(async () => {
     try {
       const response = await axios.get('/api/columns/index')
-      setColumns(response.data)
+      const columns = response.data.map((column: Column) => {
+        column.tasks = column.tasks.map((task: any) => {
+          task.dueDate = task.due_date ? new Date(task.due_date) : null
+          return task as Task
+        })
+        return column
+      })
+      setColumns(columns)
     } catch (error) {
       console.error('カラム情報の取得に失敗しました。', error)
     }

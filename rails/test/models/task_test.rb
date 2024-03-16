@@ -4,10 +4,10 @@
 #
 #  id          :bigint           not null, primary key
 #  description :text
-#  due_date    :date
-#  priority    :integer
-#  status      :string
-#  title       :string
+#  due_date    :date             not null
+#  priority    :integer          not null
+#  status      :string           not null
+#  title       :string           not null
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  column_id   :bigint           not null
