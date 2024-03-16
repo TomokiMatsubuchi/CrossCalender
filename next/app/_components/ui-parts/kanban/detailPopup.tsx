@@ -8,6 +8,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  FormHelperText,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { Column, Task } from '../../../kanban/page'
@@ -18,6 +19,7 @@ interface DetailPopupProps {
   selectedTask: Task | null
   columns: Column[]
   onEditTask: (task: Task) => void
+  errors: Record<string, string[]> | null
 }
 
 const modalStyle = {
@@ -38,6 +40,7 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
   selectedTask,
   columns,
   onEditTask,
+  errors,
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedTask, setEditedTask] = useState<Task | null>(null)
@@ -81,6 +84,8 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
               variant='outlined'
               value={editedTask?.title || ''}
               onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value } as Task)}
+              error={!!errors?.title}
+              helperText={errors?.title?.join(', ')}
             />
             <TextField
               fullWidth
@@ -93,8 +98,10 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
               onChange={(e) =>
                 setEditedTask({ ...editedTask, description: e.target.value } as Task)
               }
+              error={!!errors?.description}
+              helperText={errors?.description?.join(', ')}
             />
-            <FormControl fullWidth sx={{ mt: 2 }}>
+            <FormControl fullWidth sx={{ mt: 2 }} error={!!errors?.priority}>
               <InputLabel>優先度</InputLabel>
               <Select
                 value={editedTask?.priority}
@@ -107,8 +114,9 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
                 <MenuItem value={2}>中</MenuItem>
                 <MenuItem value={3}>高</MenuItem>
               </Select>
+              <FormHelperText>{errors?.priority?.join(', ')}</FormHelperText>
             </FormControl>
-            <FormControl fullWidth sx={{ mt: 2 }}>
+            <FormControl fullWidth sx={{ mt: 2 }} error={!!errors?.status}>
               <InputLabel>進行状況</InputLabel>
               <Select
                 value={editedTask?.status || ''}
@@ -121,6 +129,7 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
                   </MenuItem>
                 ))}
               </Select>
+              <FormHelperText>{errors?.status?.join(', ')}</FormHelperText>
             </FormControl>
             <Box sx={{ display: 'flex', justifyContent: 'end', gap: '1rem', mt: 2 }}>
               <Button onClick={handleSave} variant='contained' color='primary'>

@@ -11,6 +11,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  FormHelperText,
 } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import { Column, Task } from '@/kanban/page'
@@ -21,6 +22,7 @@ interface CreateTaskProps {
   column: Column | null
   columns: Column[]
   onCreateTask: (task: Task) => Promise<void>
+  errors: Record<string, string[]> | null
 }
 
 const CreateTaskPopup: React.FC<CreateTaskProps> = ({
@@ -29,6 +31,7 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
   column,
   columns,
   onCreateTask,
+  errors,
 }) => {
   const [newTask, setNewTask] = useState<Task>({
     title: '',
@@ -66,6 +69,8 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
           variant='outlined'
           value={newTask.title}
           onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+          error={!!errors?.title}
+          helperText={errors?.title?.join(', ')}
         />
         <TextField
           margin='dense'
@@ -78,6 +83,8 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
           variant='outlined'
           value={newTask.description}
           onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+          error={!!errors?.description}
+          helperText={errors?.description?.join(', ')}
         />
         <TextField
           margin='dense'
@@ -88,6 +95,8 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
           variant='outlined'
           value={newTask.dueDate?.toISOString().split('T')[0]}
           onChange={(e) => setNewTask({ ...newTask, dueDate: new Date(e.target.value) })}
+          error={!!errors?.dueDate}
+          helperText={errors?.dueDate?.join(', ')}
         />
         <TextField
           margin='dense'
@@ -98,8 +107,10 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
           variant='outlined'
           value={newTask.priority}
           onChange={(e) => setNewTask({ ...newTask, priority: parseInt(e.target.value, 10) })}
+          error={!!errors?.priority}
+          helperText={errors?.priority?.join(', ')}
         />
-        <FormControl fullWidth margin='dense' variant='outlined'>
+        <FormControl fullWidth margin='dense' variant='outlined' error={!!errors?.status}>
           <InputLabel id='status-label'>ステータス</InputLabel>
           <Select
             labelId='status-label'
@@ -114,6 +125,7 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
               </MenuItem>
             ))}
           </Select>
+          <FormHelperText>{errors?.status?.join(', ')}</FormHelperText>
         </FormControl>
       </DialogContent>
       <DialogActions>

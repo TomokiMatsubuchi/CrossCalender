@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import axios from '@/_lib/axios'
+import { AxiosError } from 'axios'
 
 export const PATCH = async (req: Request) => {
   const cookies = req.headers.get('Cookie')
@@ -43,8 +44,18 @@ export const PATCH = async (req: Request) => {
       })
     }
   } catch (error) {
-    return new NextResponse(JSON.stringify({ message: 'サーバーエラーが発生しました。' }), {
-      status: 500,
-    })
+    if (error instanceof AxiosError) {
+      const errorMessage = error.response?.data
+      const errorStatus = error.response?.status
+      if (errorStatus === 422) {
+        // validation error
+        return new NextResponse(JSON.stringify(errorMessage), {
+          status: errorStatus,
+        })
+      }
+      return new NextResponse(JSON.stringify({ message: 'サーバーエラーが発生しました。' }), {
+        status: 500,
+      })
+    }
   }
 }

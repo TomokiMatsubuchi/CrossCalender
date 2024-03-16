@@ -21,12 +21,28 @@ ja:
         position: 位置
         created_at: 作成日
         updated_at: 更新日
-  errors:
-    models:
-      task:
-        attributes:
-          column:
-            required: 'カラムが必須です'
-            not_found: '状態: %{status} に対応するカラムが見つかりません'
-      messages:
-        required: '%{attribute}が必須です'
+    errors:
+      models:
+        task:
+          attributes:
+            column:
+              required: 'カラムが必須です'
+              not_found: '状態: %{status} に対応するカラムが見つかりません'
+            title:
+              blank: 'タイトルを入力してください'
+            description:
+              blank: '説明を入力してください'
+            due_date:
+              blank: '期限を入力してください'
+              past: '期限は未来の日付を指定してください'
+            priority:
+              blank: '優先度を選択してください'
+            status:
+              blank: '状態を選択してください'
+        column:
+          attributes:
+            name:
+              blank: '名前を入力してください'
+            position:
+              blank: '位置を指定してください'
+              invalid: '位置の値が無効です'

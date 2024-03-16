@@ -11,7 +11,8 @@ class Api::V1::TasksController < ApplicationController
     if @task.save
       render json: @task, status: :created, location: api_v1_task_url(@task)
     else
-      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
+      error_messages = @task.errors.messages.map { |field, messages| { field => messages.join(", ") } }
+      render json: { errors: error_messages }, status: :unprocessable_entity
     end
   end
 
@@ -20,7 +21,8 @@ class Api::V1::TasksController < ApplicationController
     if @task.update(task_params)
       render json: @task
     else
-      render json: @task.errors, status: :unprocessable_entity
+      error_messages = @task.errors.messages.map { |field, messages| { field => messages.join(", ") } }
+      render json: { errors: error_messages }, status: :unprocessable_entity
     end
   end
 

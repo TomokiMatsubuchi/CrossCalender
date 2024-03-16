@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@mui/material'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import React, { useEffect, useState, useCallback } from 'react'
 import DetailPopup from '../_components/ui-parts/kanban/detailPopup'
 import CreateTaskPopup from '@/_components/ui-parts/kanban/createPopup'
@@ -32,12 +32,12 @@ const KanbanPage = () => {
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
   const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false)
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null)
+  const [errors, setErrors] = useState<Record<string, string[]> | null>(null)
 
+  // TODO: TaskのCRUDについての処理をuseTask()のカスタムフックに切り出す
   const fetchColumns = async () => {
     try {
       const response = await axios.get('/api/columns/index')
-      console.log(response.data)
-
       setColumns(response.data)
     } catch (error) {
       console.error('カラム情報の取得に失敗しました。', error)
@@ -49,10 +49,22 @@ const KanbanPage = () => {
       const response = await axios.patch(`/api/tasks/update`, task)
       if (response.status === 200) {
         console.log('タスクの更新に成功しました。', response.data)
+        setErrors(null)
       } else {
         console.error('タスクの更新に失敗しました。', response)
       }
     } catch (error) {
+      if (error instanceof AxiosError && error.response && error.response.data.errors) {
+        const formattedErrors = error.response.data.errors.reduce(
+          (acc: { [x: string]: any }, errorObj: ArrayLike<unknown> | { [s: string]: unknown }) => {
+            const [field, message] = Object.entries(errorObj)[0]
+            acc[field] = acc[field] ? [...acc[field], message] : [message]
+            return acc
+          },
+          {},
+        )
+        setErrors(formattedErrors)
+      }
       console.error('タスクの更新中にエラーが発生しました。', error)
     }
   }
@@ -67,6 +79,7 @@ const KanbanPage = () => {
   }
 
   const handleCloseDetailPopup = () => {
+    setErrors(null)
     setIsDetailPopupOpen(false)
   }
 
@@ -76,6 +89,7 @@ const KanbanPage = () => {
   }
 
   const handleCloseCreatePopup = () => {
+    setErrors(null)
     setIsCreatePopupOpen(false)
   }
 
@@ -115,8 +129,19 @@ const KanbanPage = () => {
   const createTask = async (newTask: Task) => {
     try {
       await axios.post('/api/tasks/create', newTask)
-      // taskの作成には成功したので、次はエラー時のバリデーションメッセージをRailsから受け取り表示できるようにする。
+      setErrors(null)
     } catch (error) {
+      if (error instanceof AxiosError && error.response && error.response.data.errors) {
+        const formattedErrors = error.response.data.errors.reduce(
+          (acc: { [x: string]: any }, errorObj: { [s: string]: unknown } | ArrayLike<unknown>) => {
+            const [field, message] = Object.entries(errorObj)[0]
+            acc[field] = acc[field] ? [...acc[field], message] : [message]
+            return acc
+          },
+          {},
+        )
+        setErrors(formattedErrors)
+      }
       console.error('タスクの作成に失敗しました。', error)
     }
   }
@@ -182,6 +207,7 @@ const KanbanPage = () => {
         selectedTask={selectedTask}
         columns={columns}
         onEditTask={handleEditTask}
+        errors={errors}
       />
       <CreateTaskPopup
         open={isCreatePopupOpen}
@@ -189,6 +215,7 @@ const KanbanPage = () => {
         column={selectedColumn}
         columns={columns}
         onCreateTask={createTask}
+        errors={errors}
       />
     </div>
   )
