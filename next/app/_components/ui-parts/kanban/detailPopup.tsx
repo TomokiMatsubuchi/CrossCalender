@@ -1,3 +1,5 @@
+import { Column } from '@/_hooks/useColumn'
+import { Task, TaskPriority } from '@/_hooks/useTask'
 import {
   Modal,
   Box,
@@ -11,7 +13,6 @@ import {
   FormHelperText,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { Column, Task } from '../../../kanban/page'
 
 interface DetailPopupProps {
   open: boolean
@@ -101,18 +102,35 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
               error={!!errors?.description}
               helperText={errors?.description?.join(', ')}
             />
+            <TextField
+              fullWidth
+              label='期限'
+              variant='outlined'
+              type='date'
+              sx={{ mt: 2 }}
+              value={editedTask?.dueDate?.toISOString().split('T')[0] || ''}
+              onChange={(e) =>
+                setEditedTask({ ...editedTask, dueDate: new Date(e.target.value) } as Task)
+              }
+              error={!!errors?.dueDate}
+              helperText={errors?.dueDate?.join(', ')}
+            />
             <FormControl fullWidth sx={{ mt: 2 }} error={!!errors?.priority}>
               <InputLabel>優先度</InputLabel>
               <Select
-                value={editedTask?.priority}
+                value={editedTask?.priority?.toString() || ''}
                 label='優先度'
                 onChange={(e) =>
-                  setEditedTask({ ...editedTask, priority: e.target.value as number } as Task)
+                  setEditedTask({ ...editedTask, priority: parseInt(e.target.value, 10) } as Task)
                 }
               >
-                <MenuItem value={1}>低</MenuItem>
-                <MenuItem value={2}>中</MenuItem>
-                <MenuItem value={3}>高</MenuItem>
+                {Object.entries(TaskPriority)
+                  .filter(([key]) => !parseInt(key))
+                  .map(([key, value]) => (
+                    <MenuItem key={key} value={value}>
+                      {key}
+                    </MenuItem>
+                  ))}
               </Select>
               <FormHelperText>{errors?.priority?.join(', ')}</FormHelperText>
             </FormControl>
@@ -151,7 +169,9 @@ const DetailPopup: React.FC<DetailPopupProps> = ({
             <Typography sx={{ mt: 2 }}>
               期限: {selectedTask?.dueDate?.toLocaleDateString()}
             </Typography>
-            <Typography sx={{ mt: 2 }}>優先度: {selectedTask?.priority}</Typography>
+            <Typography sx={{ mt: 2 }}>
+              優先度: {TaskPriority[selectedTask?.priority ?? 0]}
+            </Typography>
             <Typography sx={{ mt: 2 }}>進行状況: {selectedTask?.status}</Typography>
             <Box sx={{ display: 'flex', justifyContent: 'end', gap: '1rem', mt: 2 }}>
               <Button onClick={handleEdit} variant='contained' color='primary'>

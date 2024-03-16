@@ -5,73 +5,16 @@ import axios, { AxiosError } from 'axios'
 import React, { useEffect, useState, useCallback } from 'react'
 import DetailPopup from '../_components/ui-parts/kanban/detailPopup'
 import CreateTaskPopup from '@/_components/ui-parts/kanban/createPopup'
-
-export interface Task {
-  id?: React.Key
-  description?: string
-  dueDate?: Date
-  priority?: number
-  status?: string
-  title?: string
-  createdAt?: Date
-  updatedAt?: Date
-  columnId?: number
-  userId?: number
-}
-
-export interface Column {
-  id: number
-  name: string
-  position: number
-  tasks: Task[]
-}
+import { Task, useTask } from '@/_hooks/useTask'
+import { Column, useColumn } from '@/_hooks/useColumn'
 
 const KanbanPage = () => {
-  const [columns, setColumns] = useState<Column[]>([])
+  const { createTask, updateTask, deleteTask, taskErrors, setTaskErrors } = useTask()
+  const { columns, setColumns, fetchColumns } = useColumn()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
   const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false)
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null)
-  const [errors, setErrors] = useState<Record<string, string[]> | null>(null)
-
-  // TODO: TaskのCRUDについての処理をuseTask()のカスタムフックに切り出す
-  const fetchColumns = async () => {
-    try {
-      const response = await axios.get('/api/columns/index')
-      setColumns(response.data)
-    } catch (error) {
-      console.error('カラム情報の取得に失敗しました。', error)
-    }
-  }
-
-  const updateTask = async (task: Task) => {
-    try {
-      const response = await axios.patch(`/api/tasks/update`, task)
-      if (response.status === 200) {
-        console.log('タスクの更新に成功しました。', response.data)
-        setErrors(null)
-      } else {
-        console.error('タスクの更新に失敗しました。', response)
-      }
-    } catch (error) {
-      if (error instanceof AxiosError && error.response && error.response.data.errors) {
-        const formattedErrors = error.response.data.errors.reduce(
-          (acc: { [x: string]: any }, errorObj: ArrayLike<unknown> | { [s: string]: unknown }) => {
-            const [field, message] = Object.entries(errorObj)[0]
-            acc[field] = acc[field] ? [...acc[field], message] : [message]
-            return acc
-          },
-          {},
-        )
-        setErrors(formattedErrors)
-      }
-      console.error('タスクの更新中にエラーが発生しました。', error)
-    }
-  }
-
-  useEffect(() => {
-    fetchColumns()
-  }, [])
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task)
@@ -79,19 +22,31 @@ const KanbanPage = () => {
   }
 
   const handleCloseDetailPopup = () => {
-    setErrors(null)
+    setTaskErrors(null)
     setIsDetailPopupOpen(false)
   }
 
-  const handleCreateTask = (column: Column) => {
+  const handleOpenCreateTaskPopup = (column: Column) => {
     setSelectedColumn(column)
     setIsCreatePopupOpen(true)
   }
 
-  const handleCloseCreatePopup = () => {
-    setErrors(null)
+  const handleCloseCreateTaskPopup = () => {
+    setTaskErrors(null)
     setIsCreatePopupOpen(false)
   }
+
+  const handleCreateTask = useCallback(
+    async (newTask: Task) => {
+      if (await createTask(newTask)) {
+        await fetchColumns()
+        handleCloseCreateTaskPopup()
+        return true
+      }
+      return false
+    },
+    [createTask, fetchColumns],
+  )
 
   const handleEditTask = useCallback((editedTask: Task) => {
     updateTask(editedTask)
@@ -125,26 +80,6 @@ const KanbanPage = () => {
     })
     setSelectedTask(editedTask)
   }, [])
-
-  const createTask = async (newTask: Task) => {
-    try {
-      await axios.post('/api/tasks/create', newTask)
-      setErrors(null)
-    } catch (error) {
-      if (error instanceof AxiosError && error.response && error.response.data.errors) {
-        const formattedErrors = error.response.data.errors.reduce(
-          (acc: { [x: string]: any }, errorObj: { [s: string]: unknown } | ArrayLike<unknown>) => {
-            const [field, message] = Object.entries(errorObj)[0]
-            acc[field] = acc[field] ? [...acc[field], message] : [message]
-            return acc
-          },
-          {},
-        )
-        setErrors(formattedErrors)
-      }
-      console.error('タスクの作成に失敗しました。', error)
-    }
-  }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-around', overflowX: 'auto' }}>
@@ -195,7 +130,7 @@ const KanbanPage = () => {
             variant='contained'
             color='primary'
             fullWidth
-            onClick={() => handleCreateTask(column)}
+            onClick={() => handleOpenCreateTaskPopup(column)}
           >
             {column.name}に新規タスクを追加
           </Button>
@@ -207,15 +142,15 @@ const KanbanPage = () => {
         selectedTask={selectedTask}
         columns={columns}
         onEditTask={handleEditTask}
-        errors={errors}
+        errors={taskErrors}
       />
       <CreateTaskPopup
         open={isCreatePopupOpen}
-        handleClose={handleCloseCreatePopup}
+        handleClose={handleCloseCreateTaskPopup}
         column={selectedColumn}
         columns={columns}
-        onCreateTask={createTask}
-        errors={errors}
+        onCreateTask={handleCreateTask}
+        errors={taskErrors}
       />
     </div>
   )

@@ -1,4 +1,6 @@
 // TaskDialog.tsx
+import { Column } from '@/_hooks/useColumn'
+import { Task, TaskPriority } from '@/_hooks/useTask'
 import {
   Button,
   Dialog,
@@ -14,14 +16,13 @@ import {
   FormHelperText,
 } from '@mui/material'
 import React, { useState, useEffect } from 'react'
-import { Column, Task } from '@/kanban/page'
 
 interface CreateTaskProps {
   open: boolean
   handleClose: () => void
   column: Column | null
   columns: Column[]
-  onCreateTask: (task: Task) => Promise<void>
+  onCreateTask: (task: Task) => Promise<Boolean>
   errors: Record<string, string[]> | null
 }
 
@@ -33,13 +34,14 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
   onCreateTask,
   errors,
 }) => {
-  const [newTask, setNewTask] = useState<Task>({
+  const defaultTask = {
     title: '',
     description: '',
     dueDate: new Date(),
-    priority: 0,
+    priority: 2,
     status: column?.name || '',
-  })
+  }
+  const [newTask, setNewTask] = useState<Task>(defaultTask)
 
   useEffect(() => {
     setNewTask((currentTask) => ({
@@ -48,6 +50,13 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
       dueDate: new Date(),
     }))
   }, [column])
+
+  const handleCreateTask = async (task: Task) => {
+    const result = await onCreateTask(task)
+    if (result) {
+      setNewTask(defaultTask)
+    }
+  }
 
   return (
     <Dialog
@@ -98,18 +107,25 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
           error={!!errors?.dueDate}
           helperText={errors?.dueDate?.join(', ')}
         />
-        <TextField
-          margin='dense'
-          id='priority'
-          label='優先度'
-          type='number'
-          fullWidth
-          variant='outlined'
-          value={newTask.priority}
-          onChange={(e) => setNewTask({ ...newTask, priority: parseInt(e.target.value, 10) })}
-          error={!!errors?.priority}
-          helperText={errors?.priority?.join(', ')}
-        />
+        <FormControl fullWidth margin='dense' variant='outlined' error={!!errors?.priority}>
+          <InputLabel id='priority-label'>優先度</InputLabel>
+          <Select
+            labelId='priority-label'
+            id='priority'
+            value={newTask.priority?.toString() || ''}
+            onChange={(e) => setNewTask({ ...newTask, priority: parseInt(e.target.value, 10) })}
+            label='優先度'
+          >
+            {Object.entries(TaskPriority)
+              .filter(([key]) => !parseInt(key))
+              .map(([key, value]) => (
+                <MenuItem key={value} value={value}>
+                  {key}
+                </MenuItem>
+              ))}
+          </Select>
+          <FormHelperText>{errors?.priority?.join(', ')}</FormHelperText>
+        </FormControl>
         <FormControl fullWidth margin='dense' variant='outlined' error={!!errors?.status}>
           <InputLabel id='status-label'>ステータス</InputLabel>
           <Select
@@ -132,7 +148,7 @@ const CreateTaskPopup: React.FC<CreateTaskProps> = ({
         <Button onClick={handleClose} color='primary'>
           キャンセル
         </Button>
-        <Button onClick={() => onCreateTask(newTask)} variant='contained' color='primary'>
+        <Button onClick={() => handleCreateTask(newTask)} variant='contained' color='primary'>
           作成
         </Button>
       </DialogActions>
