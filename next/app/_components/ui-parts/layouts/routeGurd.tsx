@@ -9,15 +9,17 @@ export const RouteGuard = ({ children }: { children: JSX.Element }) => {
   const pathName = usePathname()
   const currentUserContext = useCurrentUser()
   const { currentUser } = currentUserContext || {}
+  const withOutAuthRoutes = ['/sign-in', '/sign-up', '/']
 
   useEffect(() => {
     if (!currentUser) {
-      if (pathName !== '/sign-in' && pathName !== '/sign-up' && pathName !== '/') {
+      if (!withOutAuthRoutes.includes(pathName)) {
         router.push('/sign-in')
       }
     } else {
-      if (pathName === '/sign-in' || pathName === '/sign-up') {
-        router.push('/kanban')
+      if (withOutAuthRoutes.includes(pathName)) {
+        router.back() // 認証がいらないページに行こうとしたら、前のページに戻るようにする。
+        // TODO: エラーメッセージを表示する。
       }
     }
   }, [currentUser, router, pathName])

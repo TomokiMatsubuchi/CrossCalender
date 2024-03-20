@@ -5,7 +5,7 @@ import { Button, Stack, TextField, Typography, IconButton, InputAdornment } from
 import axios, { isAxiosError } from 'axios'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useCurrentUser } from '../_components//context//currentUserContext'
 
 export default function SignIn() {
@@ -17,14 +17,12 @@ export default function SignIn() {
   const currentUserContext = useCurrentUser()
 
   if (!currentUserContext) return null
-  const { currentUser, setCurrentUser } = currentUserContext
+  const { setCurrentUser } = currentUserContext
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     try {
-      console.log(email, password)
-
       const response = await axios.post('/api/auth/sign-in', {
         email: email,
         password: password,
