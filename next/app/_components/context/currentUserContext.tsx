@@ -27,8 +27,6 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
       if (!isFetching) {
         setIsFetching(true)
         try {
-          console.log('fetchしている。')
-
           const response = await axios.get('/api/auth/current-user')
           setCurrentUser({
             id: response.data.id,

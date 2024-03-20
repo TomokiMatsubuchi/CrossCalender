@@ -1,20 +1,23 @@
 'use client'
 
-import { Button } from '@mui/material'
-import axios, { AxiosError } from 'axios'
-import React, { useEffect, useState, useCallback } from 'react'
+import { Button, IconButton, TextField } from '@mui/material'
+import React, { useState, useCallback } from 'react'
 import DetailPopup from '../_components/ui-parts/kanban/detailPopup'
 import CreateTaskPopup from '@/_components/ui-parts/kanban/createPopup'
 import { Task, useTask } from '@/_hooks/useTask'
 import { Column, useColumn } from '@/_hooks/useColumn'
+import EditIcon from '@mui/icons-material/Edit'
+import SaveIcon from '@mui/icons-material/Save'
 
 const KanbanPage = () => {
   const { createTask, updateTask, deleteTask, taskErrors, setTaskErrors } = useTask()
-  const { columns, setColumns, fetchColumns } = useColumn()
+  const { columns, setColumns, fetchColumns, updateColumn } = useColumn()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
   const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false)
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null)
+  const [editingColumnId, setEditingColumnId] = useState<number | null>(null)
+  const [editColumnName, setEditColumnName] = useState('')
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task)
@@ -81,6 +84,24 @@ const KanbanPage = () => {
     setSelectedTask(editedTask)
   }, [])
 
+  const handleSaveEditColumnName = useCallback(
+    async (columnId: number, newName: string) => {
+      try {
+        await updateColumn(columnId, newName)
+        setColumns((prevColumns) =>
+          prevColumns.map((column) =>
+            column.id === columnId ? { ...column, name: newName } : column,
+          ),
+        )
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setEditingColumnId(null)
+      }
+    },
+    [updateColumn, setColumns],
+  )
+
   return (
     <div style={{ display: 'flex', justifyContent: 'space-around', overflowX: 'auto' }}>
       {columns.map((column) => (
@@ -95,7 +116,45 @@ const KanbanPage = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         >
-          <h2 style={{ borderBottom: '2px solid #333', paddingBottom: '10px' }}>{column.name}</h2>
+          <div
+            style={{
+              borderBottom: '2px solid #333',
+              paddingBottom: '10px',
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            {editingColumnId === column.id ? (
+              <>
+                <TextField
+                  value={editColumnName}
+                  onChange={(e) => setEditColumnName(e.target.value)}
+                  style={{ flex: 8 }}
+                />
+                <IconButton
+                  onClick={() => {
+                    handleSaveEditColumnName(column.id, editColumnName)
+                  }}
+                  style={{ flex: 2, margin: '0 auto', backgroundColor: '#f0f0f0' }}
+                >
+                  <SaveIcon />
+                </IconButton>
+              </>
+            ) : (
+              <>
+                <h2 style={{ flex: 8 }}>{column.name}</h2>
+                <IconButton
+                  onClick={() => {
+                    setEditingColumnId(column.id)
+                    setEditColumnName(column.name)
+                  }}
+                  style={{ flex: 2, margin: '0 auto', backgroundColor: '#f0f0f0' }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </>
+            )}
+          </div>
           {column.tasks.map((task) => (
             <div
               key={task.id}

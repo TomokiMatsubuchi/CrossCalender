@@ -2,7 +2,7 @@ class Api::V1::ColumnsController < ApplicationController
   before_action :set_column, only: [:show, :update, :destroy]
 
   def index
-    @columns = current_api_v1_user.columns.includes(:tasks).all
+    @columns = current_api_v1_user.columns.includes(:tasks).order(:id).all
     render json: @columns, include: :tasks
   end
 
@@ -20,6 +20,7 @@ class Api::V1::ColumnsController < ApplicationController
   end
 
   def update
+    puts column_params
     if @column.update(column_params)
       render json: @column
     else
@@ -39,6 +40,6 @@ class Api::V1::ColumnsController < ApplicationController
   end
 
   def column_params
-    params.require(:column).permit(:name, :position)
+    params.require(:column).permit(:name)
   end
 end

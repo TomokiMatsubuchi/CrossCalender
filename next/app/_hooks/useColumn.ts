@@ -64,9 +64,9 @@ export const useColumn = () => {
   )
 
   const updateColumn = useCallback(
-    async (column: Column) => {
+    async (columnId: number, newName: string) => {
       try {
-        const response = await axios.patch(`/api/columns/update`, column)
+        const response = await axios.patch(`/api/columns/update`, { id: columnId, name: newName })
         setColumnErrors(null)
         fetchColumns()
         return response.data
