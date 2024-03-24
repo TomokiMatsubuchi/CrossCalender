@@ -4,7 +4,6 @@ import Alert from '@mui/material/Alert'
 
 const FlashMessageDisplay = () => {
   const { flashMessage } = useFlashMessage()
-  console.log(flashMessage)
 
   if (!flashMessage) return null
 

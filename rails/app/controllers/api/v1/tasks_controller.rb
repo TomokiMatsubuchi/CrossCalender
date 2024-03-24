@@ -1,6 +1,11 @@
 class Api::V1::TasksController < ApplicationController
   before_action :set_task, only: [:show, :update, :destroy]
 
+  def index
+    @tasks = current_api_v1_user.tasks
+    render json: @tasks
+  end
+
   def show
     render json: @task
   end

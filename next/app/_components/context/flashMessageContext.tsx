@@ -39,8 +39,6 @@ export const useAutoClearFlashMessage = () => {
   const { flashMessage, setFlashMessage } = useFlashMessage()
 
   useEffect(() => {
-    console.log('flashMessage', flashMessage)
-
     if (flashMessage !== null) {
       const timer = setTimeout(() => {
         setFlashMessage(null)

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import axios, { AxiosError } from 'axios'
 
 export interface Task {
@@ -21,6 +21,7 @@ export enum TaskPriority {
 }
 
 export const useTask = () => {
+  const [tasks, setTasks] = useState<Task[]>([])
   const [taskErrors, setTaskErrors] = useState<Record<string, string[]> | null>(null)
 
   const handleApiValidate = (error: unknown) => {
@@ -38,6 +39,24 @@ export const useTask = () => {
       console.error('APIの呼び出し中にエラーが発生しました。', error)
     }
   }
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/tasks/index')
+      setTaskErrors(null)
+      const tasks = response.data.map((task: any) => {
+        task.dueDate = task.due_date ? new Date(task.due_date) : null
+        return task as Task
+      })
+      setTasks(tasks)
+    } catch (error) {
+      console.error('タスク情報の取得に失敗しました。', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTasks()
+  }, [fetchTasks])
 
   const createTask = useCallback(async (newTask: Task) => {
     try {
@@ -69,5 +88,5 @@ export const useTask = () => {
     }
   }, [])
 
-  return { createTask, updateTask, deleteTask, taskErrors, setTaskErrors }
+  return { createTask, updateTask, deleteTask, taskErrors, setTaskErrors, tasks }
 }
