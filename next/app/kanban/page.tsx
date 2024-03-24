@@ -108,7 +108,8 @@ const KanbanPage = () => {
         <div
           key={column.id}
           style={{
-            minWidth: '300px',
+            minWidth: '30%',
+            width: '400px',
             margin: '20px',
             padding: '10px',
             backgroundColor: '#f0f0f0',
