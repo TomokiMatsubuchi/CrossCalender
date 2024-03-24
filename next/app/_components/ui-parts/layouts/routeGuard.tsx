@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { useCurrentUser } from '../../context/currentUserContext'
+import { useAutoClearFlashMessage } from '@/_components/context/flashMessageContext'
 
 export const RouteGuard = ({ children }: { children: JSX.Element }) => {
   const router = useRouter()
@@ -10,6 +11,7 @@ export const RouteGuard = ({ children }: { children: JSX.Element }) => {
   const currentUserContext = useCurrentUser()
   const { currentUser } = currentUserContext || {}
   const withOutAuthRoutes = ['/sign-in', '/sign-up', '/']
+  const { setFlashMessage } = useAutoClearFlashMessage()
 
   useEffect(() => {
     if (!currentUser) {
@@ -19,7 +21,10 @@ export const RouteGuard = ({ children }: { children: JSX.Element }) => {
     } else {
       if (withOutAuthRoutes.includes(pathName)) {
         router.back() // 認証がいらないページに行こうとしたら、前のページに戻るようにする。
-        // TODO: エラーメッセージを表示する。
+        setFlashMessage({
+          message: 'すでにログインしています。',
+          type: 'error',
+        })
       }
     }
   }, [currentUser, router, pathName])

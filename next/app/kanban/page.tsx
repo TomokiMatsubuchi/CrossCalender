@@ -8,6 +8,7 @@ import { Task, useTask } from '@/_hooks/useTask'
 import { Column, useColumn } from '@/_hooks/useColumn'
 import EditIcon from '@mui/icons-material/Edit'
 import SaveIcon from '@mui/icons-material/Save'
+import { useAutoClearFlashMessage } from '@/_components/context/flashMessageContext'
 
 const KanbanPage = () => {
   const { createTask, updateTask, deleteTask, taskErrors, setTaskErrors } = useTask()
@@ -18,6 +19,7 @@ const KanbanPage = () => {
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null)
   const [editingColumnId, setEditingColumnId] = useState<number | null>(null)
   const [editColumnName, setEditColumnName] = useState('')
+  const { setFlashMessage } = useAutoClearFlashMessage()
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task)
@@ -44,8 +46,16 @@ const KanbanPage = () => {
       if (await createTask(newTask)) {
         await fetchColumns()
         handleCloseCreateTaskPopup()
+        setFlashMessage({
+          message: 'タスクが作成されました。',
+          type: 'success',
+        })
         return true
       }
+      setFlashMessage({
+        message: 'タスクの作成に失敗しました。',
+        type: 'error',
+      })
       return false
     },
     [createTask, fetchColumns],
@@ -82,6 +92,10 @@ const KanbanPage = () => {
       }
     })
     setSelectedTask(editedTask)
+    setFlashMessage({
+      message: 'タスクが更新されました。',
+      type: 'success',
+    })
   }, [])
 
   const handleSaveEditColumnName = useCallback(
@@ -93,8 +107,16 @@ const KanbanPage = () => {
             column.id === columnId ? { ...column, name: newName } : column,
           ),
         )
+        setFlashMessage({
+          message: 'カラム名が更新されました。',
+          type: 'success',
+        })
       } catch (err) {
         console.error(err)
+        setFlashMessage({
+          message: 'カラム名の更新に失敗しました。',
+          type: 'error',
+        })
       } finally {
         setEditingColumnId(null)
       }

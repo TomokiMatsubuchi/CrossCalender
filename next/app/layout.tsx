@@ -5,8 +5,9 @@ import React, { memo } from 'react'
 import { CurrentUserProvider } from './_components/context/currentUserContext'
 import Footer from './_components/ui-parts/layouts/footer'
 import Header from './_components/ui-parts/layouts/header'
-import { RouteGuard } from './_components/ui-parts/layouts/routeGurd'
+import { RouteGuard } from './_components/ui-parts/layouts/routeGuard'
 import SideBar from './_components/ui-parts/layouts/sideBar'
+import { FlashMessageProvider } from './_components/context/flashMessageContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,13 +30,15 @@ export default function RootLayout({
       <body className={inter.className}>
         <CurrentUserProvider>
           <AppRouterCacheProvider>
-            <RouteGuard>
-              <>
-                <MemoizedHeader />
-                <MemoizedSideBar>{children}</MemoizedSideBar>
-                <MemoizedFooter />
-              </>
-            </RouteGuard>
+            <FlashMessageProvider>
+              <RouteGuard>
+                <>
+                  <MemoizedHeader />
+                  <MemoizedSideBar>{children}</MemoizedSideBar>
+                  <MemoizedFooter />
+                </>
+              </RouteGuard>
+            </FlashMessageProvider>
           </AppRouterCacheProvider>
         </CurrentUserProvider>
       </body>
