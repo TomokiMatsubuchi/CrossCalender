@@ -22,7 +22,7 @@ const SideBar = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = Boolean(currentUser)
 
   const menuItems = [
-    { text: 'ホーム', icon: <HomeIcon />, path: '/' },
+    { text: 'ホーム', icon: <HomeIcon />, path: '/kanban' },
     { text: 'カレンダー', icon: <CalendarTodayIcon />, path: '/calendar' },
     { text: 'マイページ', icon: <AccountCircleIcon />, path: '/my-page' },
   ]
