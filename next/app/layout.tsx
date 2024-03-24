@@ -6,6 +6,7 @@ import { CurrentUserProvider } from './_components/context/currentUserContext'
 import Footer from './_components/ui-parts/layouts/footer'
 import Header from './_components/ui-parts/layouts/header'
 import { RouteGuard } from './_components/ui-parts/layouts/routeGurd'
+import SideBar from './_components/ui-parts/layouts/sideBar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 
 const MemoizedHeader = memo(Header)
 const MemoizedFooter = memo(Footer)
+const MemoizedSideBar = memo(SideBar)
 
 export default function RootLayout({
   children,
@@ -30,7 +32,7 @@ export default function RootLayout({
             <RouteGuard>
               <>
                 <MemoizedHeader />
-                {children}
+                <MemoizedSideBar>{children}</MemoizedSideBar>
                 <MemoizedFooter />
               </>
             </RouteGuard>

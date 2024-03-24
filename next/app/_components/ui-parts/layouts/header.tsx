@@ -3,13 +3,12 @@
 import { AppBar, Box, Toolbar, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useCurrentUser } from '../../context/currentUserContext'
-import MyAccountMenu from '../../ui-elements/layouts/myAccountMenu'
+import { useCurrentUser } from '@/_components/context/currentUserContext'
+import MyAccountMenu from '@/_components/ui-elements/layouts/myAccountMenu'
 
 const Header = () => {
   const [elevate, setElevate] = useState(false)
   const currentUser = useCurrentUser()?.currentUser
-
   const isAuthenticated = Boolean(currentUser)
 
   useEffect(() => {
@@ -34,11 +33,19 @@ const Header = () => {
         }}
       >
         <Toolbar>
-          <Link href='/' style={{ textDecoration: 'none', flexGrow: 1, color: 'inherit' }}>
-            <Typography variant='h6' component='div'>
-              Cross Calender
-            </Typography>
-          </Link>
+          {isAuthenticated ? (
+            <Link href='/kanban' style={{ textDecoration: 'none', flexGrow: 1, color: 'inherit' }}>
+              <Typography variant='h6' component='div'>
+                Cross Calender
+              </Typography>
+            </Link>
+          ) : (
+            <Link href='/' style={{ textDecoration: 'none', flexGrow: 1, color: 'inherit' }}>
+              <Typography variant='h6' component='div'>
+                Cross Calender
+              </Typography>
+            </Link>
+          )}
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
             {isAuthenticated ? (
               <MyAccountMenu />
